@@ -157,13 +157,27 @@ public class Do {
 
 	/**
 	 * Perform an action for each given object spread over time
-	 * @param perTick Number of objects to process per tick
-	 * @param objects Objects to process
+	 *
+	 * @param perTick     Number of objects to process per tick
+	 * @param objects     Objects to process
 	 * @param runArgument Function to execute for each object
-	 * @param <T> Type of object to process
+	 * @param <T>         Type of object to process
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
 	public static <T> BukkitTask forAll(int perTick, Collection<T> objects, RunArgument<T> runArgument) {
+		return forAll(perTick, objects, runArgument, null);
+	}
+
+	/**
+	 * Perform an action for each given object spread over time
+	 * @param perTick Number of objects to process per tick
+	 * @param objects Objects to process
+	 * @param runArgument Function to execute for each object
+	 * @param onDone Function to call when all items have been processed
+	 * @param <T> Type of object to process
+	 * @return BukkitTask which can be used to cancel the operation
+	 */
+	public static <T> BukkitTask forAll(int perTick, Collection<T> objects, RunArgument<T> runArgument, Run onDone) {
 		final ArrayList<T> finalObjects = new ArrayList<>(objects);
 		return new BukkitRunnable() {
 			private int current = 0;
@@ -177,6 +191,9 @@ public class Do {
 					}
 				}
 				if(current >= finalObjects.size()) {
+					if(onDone != null) {
+						onDone.run();
+					}
 					this.cancel();
 				}
 			}
