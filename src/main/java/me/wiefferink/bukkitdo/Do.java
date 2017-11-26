@@ -87,12 +87,24 @@ public class Do {
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
 	public static BukkitTask syncTimer(long period, Run runnable) {
+		return syncTimerLater(0, period, runnable);
+	}
+
+	/**
+	 * Run a timer task on the main server thread.
+	 *
+	 * @param runnable The BukkitRunnable to run
+	 * @param period   Time between task runs
+	 * @param delay    Delay before starting the timer
+	 * @return BukkitTask which can be used to cancel the operation
+	 */
+	public static BukkitTask syncTimerLater(long delay, long period, Run runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
 				runnable.run();
 			}
-		}.runTaskTimer(plugin, 0, period);
+		}.runTaskTimer(plugin, delay, period);
 	}
 
 	/**
@@ -102,6 +114,18 @@ public class Do {
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
 	public static BukkitTask syncTimer(long period, RunResult<Boolean> runnable) {
+		return syncTimerLater(0, period, runnable);
+	}
+
+	/**
+	 * Run a timer task on the main server thread.
+	 *
+	 * @param runnable The BukkitRunnable to run, return false to stop the task
+	 * @param period   Time between task runs
+	 * @param delay The delay before starting execution
+	 * @return BukkitTask which can be used to cancel the operation
+	 */
+	public static BukkitTask syncTimerLater(long delay, long period, RunResult<Boolean> runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -109,7 +133,7 @@ public class Do {
 					this.cancel();
 				}
 			}
-		}.runTaskTimer(plugin, 0, period);
+		}.runTaskTimer(plugin, delay, period);
 	}
 
 	/**
@@ -129,11 +153,23 @@ public class Do {
 
 	/**
 	 * Run a timer task on an asynchronous thread.
-	 * @param runnable The BukkitRunnable to run
-	 * @param period Time between task runs
+	 *
+	 * @param runnable The BukkitRunnable to run, return false to stop the task
+	 * @param period   Time between task runs
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
 	public static BukkitTask asyncTimer(long period, RunResult<Boolean> runnable) {
+		return asyncTimerLater(0, period, runnable);
+	}
+
+	/**
+	 * Run a timer task on an asynchronous thread.
+	 * @param runnable The BukkitRunnable to run, return false to stop the task
+	 * @param period Time between task runs
+	 * @param delay The delay before starting execution
+	 * @return BukkitTask which can be used to cancel the operation
+	 */
+	public static BukkitTask asyncTimerLater(long delay, long period, RunResult<Boolean> runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -141,7 +177,7 @@ public class Do {
 					this.cancel();
 				}
 			}
-		}.runTaskTimerAsynchronously(plugin, 0, period);
+		}.runTaskTimerAsynchronously(plugin, delay, period);
 	}
 
 	/**
@@ -185,10 +221,11 @@ public class Do {
 			@Override
 			public void run() {
 				for(int i = 0; i < perTick; i++) {
-					if(current < finalObjects.size()) {
-						runArgument.run(finalObjects.get(current));
-						current++;
+					if(current >= finalObjects.size()) {
+						break;
 					}
+					runArgument.run(finalObjects.get(current));
+					current++;
 				}
 				if(current >= finalObjects.size()) {
 					if(onDone != null) {
