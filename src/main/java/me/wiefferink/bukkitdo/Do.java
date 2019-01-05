@@ -6,6 +6,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
 
 public class Do {
 
@@ -224,14 +225,19 @@ public class Do {
 					if(current >= finalObjects.size()) {
 						break;
 					}
-					runArgument.run(finalObjects.get(current));
+					T object = finalObjects.get(current);
+					try {
+						runArgument.run(object);
+					} catch (Exception e) {
+						plugin.getLogger().log(Level.SEVERE,"Do.forAll() iteration failed for object: "+object, e);
+					}
 					current++;
 				}
 				if(current >= finalObjects.size()) {
+					this.cancel();
 					if(onDone != null) {
 						onDone.run();
 					}
-					this.cancel();
 				}
 			}
 		}.runTaskTimer(plugin, 1, 1);
