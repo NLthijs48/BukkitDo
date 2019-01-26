@@ -229,7 +229,7 @@ public class Do {
 					try {
 						runArgument.run(object);
 					} catch (Exception e) {
-						plugin.getLogger().log(Level.SEVERE,"Do.forAll() iteration failed for object: "+object, e);
+						plugin.getLogger().log(Level.SEVERE,"Do.forAll() iteration failed for object: "+object+(object != null ? " (" +object.getClass().getName()+")" : ""), e);
 					}
 					current++;
 				}
