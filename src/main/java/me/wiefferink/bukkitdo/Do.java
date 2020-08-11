@@ -6,6 +6,8 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class Do {
@@ -28,7 +30,7 @@ public class Do {
 	 * @param runnable The BukkitRunnable to run
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask sync(Run runnable) {
+	public static BukkitTask sync(Runnable runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -43,7 +45,7 @@ public class Do {
 	 * @param delay Ticks to wait before running the task
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask syncLater(long delay, Run runnable) {
+	public static BukkitTask syncLater(long delay, Runnable runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -57,7 +59,7 @@ public class Do {
 	 * @param runnable The BukkitRunnable to run
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask async(Run runnable) {
+	public static BukkitTask async(Runnable runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -72,7 +74,7 @@ public class Do {
 	 * @param delay    Ticks to wait before running the task
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask asyncLater(long delay, Run runnable) {
+	public static BukkitTask asyncLater(long delay, Runnable runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -87,7 +89,7 @@ public class Do {
 	 * @param period Time between task runs
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask syncTimer(long period, Run runnable) {
+	public static BukkitTask syncTimer(long period, Runnable runnable) {
 		return syncTimerLater(0, period, runnable);
 	}
 
@@ -99,7 +101,7 @@ public class Do {
 	 * @param delay    Delay before starting the timer
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask syncTimerLater(long delay, long period, Run runnable) {
+	public static BukkitTask syncTimerLater(long delay, long period, Runnable runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -114,7 +116,7 @@ public class Do {
 	 * @param period Time between task runs
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask syncTimer(long period, RunResult<Boolean> runnable) {
+	public static BukkitTask syncTimer(long period, Supplier<Boolean> runnable) {
 		return syncTimerLater(0, period, runnable);
 	}
 
@@ -126,11 +128,11 @@ public class Do {
 	 * @param delay The delay before starting execution
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask syncTimerLater(long delay, long period, RunResult<Boolean> runnable) {
+	public static BukkitTask syncTimerLater(long delay, long period, Supplier<Boolean> runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
-				if(!runnable.run()) {
+				if(!runnable.get()) {
 					this.cancel();
 				}
 			}
@@ -143,7 +145,7 @@ public class Do {
 	 * @param period Time between task runs
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask asyncTimer(long period, Run runnable) {
+	public static BukkitTask asyncTimer(long period, Runnable runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -159,7 +161,7 @@ public class Do {
 	 * @param period   Time between task runs
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask asyncTimer(long period, RunResult<Boolean> runnable) {
+	public static BukkitTask asyncTimer(long period, Supplier<Boolean> runnable) {
 		return asyncTimerLater(0, period, runnable);
 	}
 
@@ -170,11 +172,11 @@ public class Do {
 	 * @param delay The delay before starting execution
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static BukkitTask asyncTimerLater(long delay, long period, RunResult<Boolean> runnable) {
+	public static BukkitTask asyncTimerLater(long delay, long period, Supplier<Boolean> runnable) {
 		return new BukkitRunnable() {
 			@Override
 			public void run() {
-				if(!runnable.run()) {
+				if(!runnable.get()) {
 					this.cancel();
 				}
 			}
@@ -188,7 +190,7 @@ public class Do {
 	 * @param <T>         Type of object to process
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static <T> BukkitTask forAll(Collection<T> objects, RunArgument<T> runArgument) {
+	public static <T> BukkitTask forAll(Collection<T> objects, Consumer<T> runArgument) {
 		return forAll(1, objects, runArgument);
 	}
 
@@ -201,7 +203,7 @@ public class Do {
 	 * @param <T>         Type of object to process
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static <T> BukkitTask forAll(int perTick, Collection<T> objects, RunArgument<T> runArgument) {
+	public static <T> BukkitTask forAll(int perTick, Collection<T> objects, Consumer<T> runArgument) {
 		return forAll(perTick, objects, runArgument, null);
 	}
 
@@ -214,7 +216,7 @@ public class Do {
 	 * @param <T> Type of object to process
 	 * @return BukkitTask which can be used to cancel the operation
 	 */
-	public static <T> BukkitTask forAll(int perTick, Collection<T> objects, RunArgument<T> runArgument, Run onDone) {
+	public static <T> BukkitTask forAll(int perTick, Collection<T> objects, Consumer<T> runArgument, Runnable onDone) {
 		final ArrayList<T> finalObjects = new ArrayList<>(objects);
 		return new BukkitRunnable() {
 			private int current = 0;
@@ -227,7 +229,7 @@ public class Do {
 					}
 					T object = finalObjects.get(current);
 					try {
-						runArgument.run(object);
+						runArgument.accept(object);
 					} catch (Exception e) {
 						plugin.getLogger().log(Level.SEVERE,"Do.forAll() iteration failed for object: "+object+(object != null ? " (" +object.getClass().getName()+")" : ""), e);
 					}
